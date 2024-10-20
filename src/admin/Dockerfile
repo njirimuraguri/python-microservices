@@ -1,12 +1,12 @@
-# src/admin/Dockerfile
-
-FROM python:3.11-slim
+FROM python:3.11.4-slim-bullseye
 
 WORKDIR /app
 
-COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
+# install python dependencies
+RUN pip install --upgrade pip
+COPY ./src/requirements.txt .
+COPY ./src/requirements-dev.txt .
+RUN pip install -r requirements-dev.txt
 
 COPY . .
 

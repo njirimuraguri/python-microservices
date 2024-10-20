@@ -35,14 +35,14 @@ services:
     depends_on:
       - postgres
       - rabbitmq
-    environment:
-      DJANGO_SERVER: ${POSTGRES_SERVER}
-      DJANGO_DB_NAME: ${POSTGRES_DB}
-      DJANGO_DB_USER: ${POSTGRES_USER}
-      DJANGO_DB_PASSWORD: ${POSTGRES_PASSWORD}
+#    environment:
+#      DJANGO_SERVER: ${POSTGRES_SERVER}
+#      DJANGO_DB_NAME: ${POSTGRES_DB}
+#      DJANGO_DB_USER: ${POSTGRES_USER}
+#      DJANGO_DB_PASSWORD: ${POSTGRES_PASSWORD}
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./src/admin:/app  # Adjust volumes as needed
+      - ./src/admin:/app
     ports:
       - "8000:8000"
 
@@ -55,11 +55,11 @@ services:
     depends_on:
       - postgres
       - rabbitmq
-    environment:
-      FASTAPI_SERVER: ${POSTGRES_SERVER}
-      FASTAPI_DB_NAME: ${POSTGRES_DB}
-      FASTAPI_DB_USER: ${POSTGRES_USER}
-      FASTAPI_DB_PASSWORD: ${POSTGRES_PASSWORD}
+#    environment:
+#      FASTAPI_SERVER: ${POSTGRES_SERVER}
+#      FASTAPI_DB_NAME: ${POSTGRES_DB}
+#      FASTAPI_DB_USER: ${POSTGRES_USER}
+#      FASTAPI_DB_PASSWORD: ${POSTGRES_PASSWORD}
     command: uvicorn main.main:app --host 0.0.0.0 --port 8001 --reload  # Add command to start FastAPI
     volumes:
       - ./src/main:/app  # Adjust volumes as needed

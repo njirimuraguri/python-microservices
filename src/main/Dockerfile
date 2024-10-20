@@ -8,12 +8,14 @@ WORKDIR /src/pp
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED
-# copy requirements into container
-COPY ./requirements.txt .
+ENV PYTHONUNBUFFERED 1
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+
+# install python dependencies
+RUN pip install --upgrade pip
+COPY ./src/requirements.txt .
+COPY ./src/requirements-dev.txt .
+RUN pip install -r requirements-dev.txt
 
 # add app/code to container
 COPY . .
