@@ -4,7 +4,9 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy import delete, select
 
-from . import model as customer_model, schema as customer_schema
+# from . import model as customer_model, schema as customer_schema
+from src.main.customer import model as customer_model
+from src.main.customer import schema as customer_schema
 from ..database.base import Base
 from .model import Customer
 

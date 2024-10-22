@@ -8,8 +8,8 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     item = Column(String, index=True)
-    amount = Column(Integer)
-    time = Column(DateTime)
-    customer_id = Column(Integer, ForeignKey("customers.id"))
+    amount = Column(Integer, index=True)
+    time = Column(DateTime, index=True)
+    customer_id = Column(Integer, ForeignKey("customers.id"), index=True)
 
     customer = relationship("Customer", back_populates="orders")

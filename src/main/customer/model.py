@@ -11,5 +11,5 @@ class Customer(Base):
     country = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     phone_number = Column(String, unique=True, index=True)
-    gender = Column(String)
+    gender = Column(String, index=True)
     hashed_password = Column(String)

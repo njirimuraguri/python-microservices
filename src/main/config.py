@@ -49,7 +49,7 @@ class Settings(BaseSettings):
             host=info.data["POSTGRES_SERVER"],
             path=f"{info.data['POSTGRES_DB'] or ''}",
         )
-        print(f"connection uri: {conn_url}")
+        print(f"connection url: {conn_url}")
         return str(conn_url)
 
     ALGORITHM: str = "HS256"

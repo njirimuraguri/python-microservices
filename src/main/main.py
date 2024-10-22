@@ -18,9 +18,9 @@ from src.main.orders.routes import router as order_router
 # Initialize the FastAPI application
 app = FastAPI(title="FastAPI Main Service")
 
-app.include_router(customer_router, prefix="/customer", tags=["customer"])
-app.include_router(auth_router)
-app.include_router(order_router)
+app.include_router(auth_router, prefix="/auth", tags=["AUTH"])
+app.include_router(customer_router, prefix="/customer", tags=["CUSTOMERS"])
+app.include_router(order_router, prefix="/order", tags=["ORDERS"])
 
 
 @app.on_event("startup")

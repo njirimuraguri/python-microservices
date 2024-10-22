@@ -26,7 +26,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return jwt_security.verify_token(token)
 
 
-@router.post("/register", response_model=model.User)
+@router.post("/Register User", response_model=schema.User)
 async def register_user(user_in: schema.UserCreate, async_db: AsyncSession = Depends(get_session)):
     existing_user = await crud.user.get_user_by_email(async_db=async_db, email=user_in.email)
     if existing_user:
@@ -40,7 +40,7 @@ async def register_user(user_in: schema.UserCreate, async_db: AsyncSession = Dep
 
 
 # Route to log in and generate a JWT token
-@router.post("/token", response_model=schema.Token)
+@router.post("/Token", response_model=schema.Token)
 async def login_for_access_token(async_db: AsyncSession = Depends(get_session), form_data: OAuth2PasswordRequestForm = Depends()):
     user = await crud.user.authenticate(async_db, email=form_data.username, password=form_data.password)
 
@@ -61,6 +61,6 @@ async def login_for_access_token(async_db: AsyncSession = Depends(get_session), 
 
 
 # Example route that requires authentication
-@router.get("/users/me", response_model=model.User)
+@router.get("/users/me", response_model=schema.User)
 def read_users_me(current_user: model.User = Depends(get_current_user)):
     return current_user
