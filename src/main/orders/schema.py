@@ -16,7 +16,7 @@ class OrderCreate(OrderBase):
 
 
 # Properties to receive via API on order update
-class OrderUpdate:
+class OrderUpdate(OrderBase):
     def model_dump(self, exclude_unset):
         pass
 
@@ -29,7 +29,7 @@ class OrderInDBBase(OrderBase):
 
 
 # Properties to return to client
-class Oder(OrderInDBBase):
+class Order(OrderInDBBase):
     pass
 
 

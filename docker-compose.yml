@@ -9,9 +9,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_SERVER: ${POSTGRES_SERVER}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
 
@@ -28,18 +27,13 @@ services:
 
   django-admin:
     build:
-      context: ./src/admin
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: src/admin/Dockerfile
     env_file:
       - .env
     depends_on:
       - postgres
       - rabbitmq
-#    environment:
-#      DJANGO_SERVER: ${POSTGRES_SERVER}
-#      DJANGO_DB_NAME: ${POSTGRES_DB}
-#      DJANGO_DB_USER: ${POSTGRES_USER}
-#      DJANGO_DB_PASSWORD: ${POSTGRES_PASSWORD}
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./src/admin:/app
@@ -48,21 +42,16 @@ services:
 
   fastapi-main:
     build:
-      context: ./src/main
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: src/main/Dockerfile
     env_file:
       - .env
     depends_on:
       - postgres
       - rabbitmq
-#    environment:
-#      FASTAPI_SERVER: ${POSTGRES_SERVER}
-#      FASTAPI_DB_NAME: ${POSTGRES_DB}
-#      FASTAPI_DB_USER: ${POSTGRES_USER}
-#      FASTAPI_DB_PASSWORD: ${POSTGRES_PASSWORD}
-    command: uvicorn main.main:app --host 0.0.0.0 --port 8001 --reload  # Add command to start FastAPI
+    command: bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done; uvicorn src.main.main:app --reload --host 0.0.0.0 --port 8001'
     volumes:
-      - ./src/main:/app  # Adjust volumes as needed
+      - ./src/main:/app
     ports:
       - "8001:8001"
 

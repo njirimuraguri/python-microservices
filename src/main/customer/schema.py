@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, ConfigDict
 # Shared properties
 class CustomerBase(BaseModel):
     name: Union[str, None]
-    email: EmailStr
+    email: Union[str, None]
     code: Union[str, None]
     country: Union[str, None]
     phone_number: Union[str, None]
@@ -14,7 +14,7 @@ class CustomerBase(BaseModel):
 
 # Properties to receive on customer creation
 class CustomerCreate(CustomerBase):
-    password: str
+    hashed_password: str
 
 
 # Properties to receive via API on update by customer

@@ -5,7 +5,7 @@ settings: Settings = get_settings()
 
 
 # create Asynchronous engine and session
-async_engine = create_async_engine(settings.SQLALCHEMY_DATABASE_URL)  # type: ignore
+async_engine = create_async_engine(settings.SQLALCHEMY_DATABASE_URI)  # type: ignore
 async_session_local = async_sessionmaker(async_engine, expire_on_commit=False)
 
 

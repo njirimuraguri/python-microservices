@@ -4,9 +4,9 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy import delete, select
 
-import model as customer_model, schema as customer_schema
+from . import model as customer_model, schema as customer_schema
+from ..database.base import Base
 from .model import Customer
-from ..database.session import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -60,8 +60,8 @@ class CRUDCustomer(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     async def delete_customer(self, async_db: AsyncSession, customer_id: int) -> customer_model.Customer:
         customer = await self.get_customer(async_db, customer_id)
         if customer:
-            await db.delete(customer)
-            await db.commit()
+            await async_db.delete(customer)
+            await async_db.commit()
         return customer
 
 

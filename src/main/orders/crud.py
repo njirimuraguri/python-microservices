@@ -1,10 +1,13 @@
 from typing import Any, Union, Generic, Type, TypeVar
+
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import delete, select
+from .model import Order
 
 import model as order_model, schema as order_schema
-
+from src.main.database import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -65,3 +68,5 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             await db.commit()
         return order
 
+
+order = CRUDOrder(Order)
