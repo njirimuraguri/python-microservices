@@ -1,5 +1,7 @@
 from typing import Any, Union, Generic, Type, TypeVar
 from sqlalchemy.ext.asyncio import AsyncSession
+import redis.asyncio as redis
+import json
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy import delete, select
@@ -37,18 +39,57 @@ class CRUDCustomer(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         result = await async_db.execute(select(self.model).where(self.model.id == customer_id))
         return result.scalars().first()
 
-    async def get_customers(self, async_db: AsyncSession, skip: int = 0, limit: int = 100) -> list[customer_model.Customer]:
-        result = await async_db.execute(select(self.model).offset(skip).limit(limit))
-        return list(result.scalars().all())
+    redis_client = redis.Redis.from_url("redis://localhost")
+
+    async def get_customers(
+            self,
+            async_db: AsyncSession,
+            skip: int = 0,
+            limit: int = 100,
+            country: str = None,  # For filtering by country
+            sort_by: str = "name",  # Sorting field
+            order: str = "asc",  # Sorting direction
+            use_cache: bool = True,  # Caching control
+            cache_key: str = "customers"
+    ) -> list[customer_model.Customer]:
+
+        # Check cache first
+        if use_cache:
+            cached_data = await redis.get(cache_key)
+            if cached_data:
+                return json.loads(cached_data)
+
+        # Build the query
+        query = select(self.model)
+
+        # Apply filtering
+        if country:
+            query = query.where(self.model.country == country)
+
+        # Apply sorting
+        if order == "desc":
+            query = query.order_by(getattr(self.model, sort_by).desc())
+        else:
+            query = query.order_by(getattr(self.model, sort_by).asc())
+
+        # Pagination
+        query = query.offset(skip).limit(limit)
+
+        result = await async_db.execute(query)
+        customers = list(result.scalars().all())
+
+        # Cache the result
+        if use_cache:
+            await redis.set(cache_key, json.dumps([jsonable_encoder(customer) for customer in customers]), ex=60)
+
+        return customers
 
     async def update_customer(
-        self, async_db: AsyncSession, *, db_obj: customer_model.Customer, obj_in: Union[customer_schema.CustomerUpdate, dict[str, Any]]
+            self, async_db: AsyncSession, *, db_obj: customer_model.Customer,
+            obj_in: Union[customer_schema.CustomerUpdate, dict[str, Any]]
     ) -> customer_model.Customer:
         obj_data = jsonable_encoder(db_obj)
-        if isinstance(obj_in, dict):
-            update_data = obj_in
-        else:
-            update_data = obj_in.model_dump(exclude_unset=True)
+        update_data = obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True)
 
         for field in obj_data:
             if field in update_data:
