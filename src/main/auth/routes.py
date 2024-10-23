@@ -28,21 +28,23 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 @router.post("/Register User", response_model=schema.User)
 async def register_user(user_in: schema.UserCreate, async_db: AsyncSession = Depends(get_session)):
-    existing_user = await crud.user.get_user_by_email(async_db=async_db, email=user_in.email)
+    async with async_db as session:
+        existing_user = await crud.user.get_user_by_email(async_db=session, email=user_in.email)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="email already registered",
         )
 
-    user = await crud.user.create_user(async_db=async_db, obj_in=user_in)
+    user = await crud.user.create_user(async_db=session, obj_in=user_in)
     return user
 
 
 # Route to log in and generate a JWT token
 @router.post("/Token", response_model=schema.Token)
-async def login_for_access_token(async_db: AsyncSession = Depends(get_session), form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await crud.user.authenticate(async_db, email=form_data.username, password=form_data.password)
+async def login_for_access_token(async_db: AsyncSession = Depends(get_session), form_data: OAuth2PasswordRequestForm = Depends()):  # noqa: E501
+    async with async_db as session:
+        user = await crud.user.authenticate(session, email=form_data.username, password=form_data.password)
 
     if not user:
         raise HTTPException(

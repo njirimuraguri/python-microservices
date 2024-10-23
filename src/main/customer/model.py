@@ -1,15 +1,19 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Integer, String, ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+
 from ..database.base import Base
 
 
 class Customer(Base):
     __tablename__ = "customers"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    code = Column(String, index=True)
-    country = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
-    phone_number = Column(String, unique=True, index=True)
-    gender = Column(String, index=True)
-    hashed_password = Column(String)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(index=True, nullable=True)
+    code: Mapped[str] = mapped_column(index=True, nullable=True)
+    country: Mapped[str] = mapped_column(index=True, nullable=True)
+    email: Mapped[str] = mapped_column(unique=True, index=True, nullable=True)
+    phone_number: Mapped[str] = mapped_column(unique=True, index=True, nullable=True)
+    gender: Mapped[str] = mapped_column(index=True, nullable=True)
+    hashed_password: Mapped[str] = mapped_column(String)
+
+    orders = relationship("Order", back_populates="customer")

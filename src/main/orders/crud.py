@@ -24,18 +24,19 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.model = model
 
     async def create_order(
-        self, db: AsyncSession, *, obj_in: Union[order_schema.OrderCreate, dict[str, Any]]
+        self, async_db: AsyncSession, *, obj_in: Union[order_schema.OrderCreate, dict[str, Any]]
     ) -> order_model.Order:
         if isinstance(obj_in, dict):
             order_data = obj_in
         else:
             order_data = obj_in.model_dump(exclude_unset=True)
 
-        db_order = self.model(**order_data)
-        db.add(db_order)
-        await db.commit()
-        await db.refresh(db_order)
-        return db_order
+        async with async_db as session:
+            db_order = self.model(**order_data)
+            session.add(db_order)
+            await session.commit()
+            await session.refresh(db_order)
+            return db_order
 
 
     async def get_orders_by_date_range(

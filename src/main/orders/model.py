@@ -1,15 +1,18 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
+from datetime import datetime
+
+from sqlalchemy import Integer, String, ForeignKey, DateTime, TIMESTAMP
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 from ..database.base import Base
 
 
 class Order(Base):
     __tablename__ = "orders"
 
-    id = Column(Integer, primary_key=True, index=True)
-    item = Column(String, index=True)
-    amount = Column(Integer, index=True)
-    time = Column(DateTime, index=True)
-    customer_id = Column(Integer, ForeignKey("customers.id"), index=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    item: Mapped[str] = mapped_column(index=True, nullable=True)
+    amount: Mapped[int] = mapped_column(index=True, nullable=True)
+    time: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), index=True, nullable=True)
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"), index=True)
 
     customer = relationship("Customer", back_populates="orders")
+

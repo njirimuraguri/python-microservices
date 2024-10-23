@@ -29,10 +29,6 @@ async def startup_event():
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the FastAPI Main Service"}
-
 
 if __name__ == '__main__':
     app.run("main:app", debug=True, host='0.0.0.0')
