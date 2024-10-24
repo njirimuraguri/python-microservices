@@ -8,18 +8,16 @@ client = TestClient(app)
 # Sample order data
 sample_order = {
     "item": "Laptop",
-    "amount": 1500,
+    "amount": 50000,
     "customer_phone": "+25723262333"
 }
 
 
 # Test order creation
 def test_create_order():
-    # Mock the RabbitMQ publishing function
     with patch('main.core.rabbitmq.publish_order_created_message') as mock_publish:
         response = client.post("/orders/", json=sample_order)
 
-        # Check that the API responds with a successful creation
         assert response.status_code == 201
         data = response.json()
         assert data["item"] == sample_order["item"]
@@ -28,7 +26,7 @@ def test_create_order():
 
         mock_publish.assert_called_once_with({
             "order_id": data["id"],
-            "phone_number": data["customer_phone"]
+            "phone_number": data["customer_phone"],
             "item": data["item"],
             "amount": data["amount"]
         })
@@ -43,8 +41,6 @@ def test_get_order():
     # Fetch the order by its ID
     order_id = created_order["id"]
     response = client.get(f"/orders/{order_id}")
-
-    # Check that the API responds with the correct order data
     assert response.status_code == 200
     fetched_order = response.json()
     assert fetched_order["item"] == sample_order["item"]

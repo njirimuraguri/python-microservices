@@ -34,7 +34,7 @@ def process_order(ch, method, properties, body):
         log.info(f"Received order: {order_data}")
 
         # Prepare the SMS message
-        message = f"Hello! Your order for {order_data['item']} worth {order_data['amount']} has been placed successfully."
+        message = f"Hello! Your order for {order_data['item']} worth {order_data['amount']} has been placed successfully."  # noqa: E501
 
         # Send SMS to the customer
         send_sms(order_data["+254723262333"], message)

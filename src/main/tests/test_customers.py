@@ -27,24 +27,20 @@ updated_customer_data = {
 
 # Test creating a customer
 def test_create_customer():
-    # Mock the RabbitMQ function to ensure RabbitMQ is not actually hit
     with patch('main.core.rabbitmq.publish_order_created_message') as mock_publish:
         response = client.post("/customers/", json=sample_customer)
 
-        # Assert successful creation
         assert response.status_code == 201
         created_customer = response.json()
         assert created_customer["name"] == sample_customer["name"]
         assert created_customer["email"] == sample_customer["email"]
         assert created_customer["phone_number"] == sample_customer["phone_number"]
 
-        # RabbitMQ mock should not be triggered here since it's not related to customer creation
         mock_publish.assert_not_called()
 
 
 # Test fetching a customer by ID
 def test_get_customer_by_id():
-    # First, create the customer
     response = client.post("/customers/", json=sample_customer)
     assert response.status_code == 201
     created_customer = response.json()
@@ -66,14 +62,13 @@ def test_get_all_customers():
     assert response.status_code == 200
     customers = response.json()
 
-    # Ensure a list of customers is returned
+    # return customers
     assert isinstance(customers, list)
-    assert len(customers) > 0  # Ensure that there's at least one customer
+    assert len(customers) > 0
 
 
 # Test updating a customer
 def test_update_customer():
-    # First, create a customer
     response = client.post("/customers/", json=sample_customer)
     assert response.status_code == 201
     created_customer = response.json()
@@ -92,7 +87,7 @@ def test_update_customer():
 
 # Test deleting a customer
 def test_delete_customer():
-    # First, create a customer
+    # create a customer
     response = client.post("/customers/", json=sample_customer)
     assert response.status_code == 201
     created_customer = response.json()
