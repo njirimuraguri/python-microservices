@@ -1,7 +1,7 @@
 from datetime import datetime
-
-from sqlalchemy import Integer, String, ForeignKey, DateTime, TIMESTAMP
+from sqlalchemy import ForeignKey, TIMESTAMP
 from sqlalchemy.orm import relationship, mapped_column, Mapped
+
 from ..database.base import Base
 
 
@@ -14,5 +14,5 @@ class Order(Base):
     time: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), index=True, nullable=True)
     customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"), index=True)
 
-    customer = relationship("Customer", back_populates="orders")
+    customer = relationship("Customer", back_populates="orders") #  relationship between customer and order table
 

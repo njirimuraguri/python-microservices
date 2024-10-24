@@ -1,6 +1,3 @@
-# src/main/auth/models.py
-
-from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.main.database.base import Base

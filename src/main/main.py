@@ -8,6 +8,7 @@ from src.main.database.base import Base
 from src.main.customer.routes import router as customer_router
 from src.main.auth.routes import router as auth_router
 from src.main.orders.routes import router as order_router
+from src.main.router.router import router as test
 # from dotenv import load_dotenv
 
 # load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../.env"))
@@ -21,6 +22,7 @@ app = FastAPI(title="FastAPI Main Service")
 app.include_router(auth_router, tags=["AUTH"])
 app.include_router(customer_router, tags=["CUSTOMERS"])
 app.include_router(order_router, tags=["ORDERS"])
+app.include_router(test, tags=["TEST"])
 
 
 @app.on_event("startup")

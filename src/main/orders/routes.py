@@ -1,21 +1,32 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
-from fastapi import HTTPException
 from typing_extensions import List
 
 from . import crud as order_crud, schema as order_schema
 from ..core.dependencies import get_session
+from src.main.core.rabbitmq import publish_order_created_message
 
 router = APIRouter()
 
 
+# create order
 @router.post("/orders", response_model=order_schema.Order)
 async def create_order(order: order_schema.OrderCreate, async_db: AsyncSession = Depends(get_session)):
     async with async_db as session:
         order = await order_crud.order.create_order(async_db=session, obj_in=order)
+
+        # order data for rabbitMQ message
+        order_event_data = {
+            "order_id": order.id,
+            "item": order.item,
+            "amount": order.amount
+        }
+        # publish the order created event to RabbitMQ
+        publish_order_created_message(order_event_data)
     return order
 
+# Get order by date range
 @router.get("/orders/search", response_model=List[order_schema.Order])
 async def get_orders_by_date_range(
     start_date: datetime,
@@ -31,6 +42,7 @@ async def get_orders_by_date_range(
     return orders
 
 
+# Get order by id
 @router.get("/orders/{order_id}", response_model=order_schema.Order)
 async def get_order_by_id(
     order_id: int,
@@ -43,6 +55,7 @@ async def get_order_by_id(
         return order
 
 
+# get order by customer id
 @router.get("/orders", response_model=List[order_schema.Order])
 async def get_orders(
     skip: int = 0,
@@ -68,6 +81,7 @@ async def get_orders(
     return orders
 
 
+# update order by id
 @router.put("/orders/{order_id}", response_model=order_schema.Order)
 async def update_order(
         order_id: int,
@@ -83,6 +97,7 @@ async def update_order(
         return updated_order
 
 
+# delete order
 @router.delete("/orders/{order_id}", response_model=order_schema.Order)
 async def delete_order(
         order_id: int,

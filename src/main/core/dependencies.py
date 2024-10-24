@@ -1,7 +1,8 @@
-from ..config import Settings, get_settings
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
+
 from ..database.session import async_session_local
+from ..config import Settings, get_settings
 
 settings: Settings = get_settings()
 

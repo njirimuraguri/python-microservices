@@ -1,12 +1,12 @@
+import json
+
 from typing import Any, Union, Generic, Type, TypeVar
 from sqlalchemy.ext.asyncio import AsyncSession
 import redis.asyncio as redis
-import json
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-from sqlalchemy import delete, select
+from sqlalchemy import select
 
-# from . import model as customer_model, schema as customer_schema
 from src.main.customer import model as customer_model
 from src.main.customer import schema as customer_schema
 from ..database.base import Base
@@ -21,6 +21,7 @@ class CRUDCustomer(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]) -> None:
         self.model = model
 
+    # create customer
     async def create_customer(
         self, async_db: AsyncSession, *, obj_in: Union[customer_schema.CustomerCreate, dict[str, Any]]
     ) -> customer_model.Customer:
@@ -35,12 +36,14 @@ class CRUDCustomer(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         await async_db.refresh(db_customer)
         return db_customer
 
+    # function to get a customer
     async def get_customer(self, async_db: AsyncSession, customer_id: int) -> customer_model.Customer | None:
         result = await async_db.execute(select(self.model).where(self.model.id == customer_id))
         return result.scalars().first()
 
     redis_client = redis.Redis.from_url("redis://localhost")
 
+    # Sorting, Pagination  and Filtering
     async def get_customers(
             self,
             async_db: AsyncSession,
@@ -84,6 +87,7 @@ class CRUDCustomer(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         return customers
 
+    # function to update a customer according to ID
     async def update_customer(
             self, async_db: AsyncSession, *, db_obj: customer_model.Customer,
             obj_in: Union[customer_schema.CustomerUpdate, dict[str, Any]]
@@ -100,6 +104,7 @@ class CRUDCustomer(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         await async_db.refresh(db_obj)
         return db_obj
 
+    # Delete Customer
     async def delete_customer(self, async_db: AsyncSession, customer_id: int) -> customer_model.Customer:
         customer = await self.get_customer(async_db, customer_id)
         if customer:

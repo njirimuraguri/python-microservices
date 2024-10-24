@@ -8,6 +8,7 @@ from ..core.dependencies import get_session
 router = APIRouter()
 
 
+# route to create a customer
 @router.post("/customer", response_model=customer_schema.Customer)
 async def create_customer(
     customer: customer_schema.CustomerCreate,
@@ -18,6 +19,7 @@ async def create_customer(
     return created_customer
 
 
+# Gwt customer by ID
 @router.get("/customer/{customer_id}", response_model=customer_schema.Customer)
 async def get_customer_by_id(
     customer_id: int,
@@ -29,6 +31,8 @@ async def get_customer_by_id(
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
 
+
+# Filter customer by country
 @router.get("/customer", response_model=List[customer_schema.Customer])
 async def get_customers(
     skip: int = 0,
@@ -51,6 +55,8 @@ async def get_customers(
         )
     return customers
 
+
+#update customer by ID
 @router.put("/customers/{customer_id}", response_model=customer_schema.Customer)
 async def update_customer(
         customer_id: int,
@@ -66,7 +72,7 @@ async def update_customer(
         return updated_customer
 
 
-
+# Delete customer
 @router.delete("/customer/{customer_id}", response_model=customer_schema.Customer)
 async def delete_customer(
         customer_id: int,

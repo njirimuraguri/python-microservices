@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import Any
-
 from sqlalchemy import DateTime, func
-# from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.orm import Mapped, mapped_column, as_declarative, declared_attr
+from typing import Any
 
 
 @as_declarative()

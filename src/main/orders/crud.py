@@ -1,17 +1,16 @@
+import json
+
 from datetime import datetime
 from typing import Any, Union, Generic, Type, TypeVar
-
 from django.core.cache.backends import redis
-from sqlalchemy import select
 import redis.asyncio as redis
-import json
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import delete, select
+from sqlalchemy import select
+
 from .model import Order
 from . import model as order_model, schema as order_schema
-# import model as order_model, schema as order_schema
 from src.main.database import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
@@ -23,6 +22,7 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]) -> None:
         self.model = model
 
+    # Create order
     async def create_order(
         self, async_db: AsyncSession, *, obj_in: Union[order_schema.OrderCreate, dict[str, Any]]
     ) -> order_model.Order:
@@ -38,7 +38,7 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             await session.refresh(db_order)
             return db_order
 
-
+    # get orders bt date range
     async def get_orders_by_date_range(
             async_db: AsyncSession, start_date: datetime, end_date: datetime, skip: int = 0, limit: int = 100
     , self=None) -> list[order_model.Order]:
@@ -47,12 +47,14 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         result = await async_db.execute(query)
         return list(result.scalars().all())
 
+    # get order by order id
     async def get_order(self, db: AsyncSession, order_id: int) -> order_model.Order | None:
         result = await db.execute(select(self.model).where(self.model.id == order_id))
         return result.scalars().first()
 
     redis_client = redis.Redis.from_url("redis://localhost")
 
+    # Catching, Pagination and Sorting
     async def get_orders(
             async_db: AsyncSession,
             skip: int = 0,
@@ -99,6 +101,7 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         return orders
 
+    # update order
     async def update_order(
             self, db: AsyncSession, db_obj: order_model.Order, obj_in: Union[order_schema.OrderUpdate, dict[str, Any]]
     ) -> order_model.Order:
@@ -114,6 +117,7 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         await db.refresh(db_obj)
         return db_obj
 
+    # delete oder by id
     async def delete_order(self, db: AsyncSession, order_id: int) -> order_model.Order:
         order = await self.get_order(db, order_id)
         if order:

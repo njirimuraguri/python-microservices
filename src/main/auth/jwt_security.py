@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 from typing import Any, Union
-
 import bcrypt
 from fastapi import HTTPException
 from jose import jwt
+
 
 from ..config import Settings, get_settings
 

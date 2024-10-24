@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="allow")
     APP_NAME: str = "FastAPI Main Service"
 
+    RABBITMQ_URL: str = os.getenv("RABBITMQ_URL")
+
+
     # Use this to periodically generate secret at a python cli
     # SECRET_KEY = secret_key_generator.generate(len_of_secret_key=64, file_name=".secret.txt")
     # print(SECRET_KEY)
