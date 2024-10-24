@@ -4,26 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from . import jwt_security, schema, model, crud
+from . import jwt_security, schema, model, crud, dependencies
 from src.main.core.dependencies import get_session
 from src.main.config import Settings, get_settings
+from .dependencies import get_current_user
 
 router = APIRouter()
 
 settings: Settings = get_settings()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
-
-
-# create user
-async def create_user(async_db: AsyncSession, user_in: schema.UserCreate) -> model.User:
-    user = await crud.user.create_user(async_db=async_db, obj_in=user_in)
-    return user
-
-
-# get current user
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    return jwt_security.verify_token(token)
 
 
 # route to register a user
@@ -65,5 +55,5 @@ async def login_for_access_token(async_db: AsyncSession = Depends(get_session), 
 
 # Example route that requires authentication
 @router.get("/users/me", response_model=schema.User)
-def read_users_me(current_user: model.User = Depends(get_current_user)):
+def read_users_me(current_user: model.User = Depends(dependencies.get_current_user)):
     return current_user

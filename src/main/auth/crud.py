@@ -31,9 +31,9 @@ class CRUDUser(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_user
 
     # function to get a user
-    async def get_user(self, async_db: AsyncSession, user_id: int) -> user_model.User | None:
+    async def get_user(self, async_db: AsyncSession, user_id: int) -> [ModelType]:
         user = await async_db.execute(select(self.model).where(self.model.id == user_id))
-        return user.scalars().first()
+        return list(user.scalars().all())
 
     # function to get users
     async def get_users(self, async_db: AsyncSession, skip: int = 0, limit: int = 100) -> list[user_model.User]:

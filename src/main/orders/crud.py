@@ -24,7 +24,7 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     # Create order
     async def create_order(
-        self, async_db: AsyncSession, *, obj_in: Union[order_schema.OrderCreate, dict[str, Any]]
+        self, *, async_db: AsyncSession, obj_in: Union[order_schema.OrderCreate, dict[str, Any]]
     ) -> order_model.Order:
         if isinstance(obj_in, dict):
             order_data = obj_in
@@ -40,22 +40,26 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     # get orders bt date range
     async def get_orders_by_date_range(
+            self,
+            *,
             async_db: AsyncSession, start_date: datetime, end_date: datetime, skip: int = 0, limit: int = 100
-    , self=None) -> list[order_model.Order]:
+    ) -> list[order_model.Order]:
         query = select(self.model).where(self.model.time.between(start_date, end_date))
         query = query.offset(skip).limit(limit)
         result = await async_db.execute(query)
         return list(result.scalars().all())
 
     # get order by order id
-    async def get_order(self, db: AsyncSession, order_id: int) -> order_model.Order | None:
-        result = await db.execute(select(self.model).where(self.model.id == order_id))
+    async def get_order(self, async_db: AsyncSession, order_id: int) -> order_model.Order | None:
+        result = await async_db.execute(select(self.model).where(self.model.id == order_id))
         return result.scalars().first()
 
     redis_client = redis.Redis.from_url("redis://localhost")
 
     # Catching, Pagination and Sorting
     async def get_orders(
+            self,
+            *,
             async_db: AsyncSession,
             skip: int = 0,
             limit: int = 100,
@@ -65,7 +69,7 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             order: str = "asc",
             use_cache: bool = True,
             cache_key: str = "orders"
-    , self=None) -> list[order_model.Order]:
+    ) -> list[order_model.Order]:
 
         # Check cache first
         if use_cache:
@@ -91,7 +95,7 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         # Add pagination
         query = query.offset(skip).limit(limit)
 
-        result = await db.execute(query)
+        result = await async_db.execute(query)
         orders = list(result.scalars().all())
 
         # Cache the result if caching is enabled
@@ -103,7 +107,7 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     # update order
     async def update_order(
-            self, db: AsyncSession, db_obj: order_model.Order, obj_in: Union[order_schema.OrderUpdate, dict[str, Any]]
+            self, async_db: AsyncSession, db_obj: order_model.Order, obj_in: Union[order_schema.OrderUpdate, dict[str, Any]]
     ) -> order_model.Order:
         obj_data = jsonable_encoder(db_obj)
         update_data = obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True)
@@ -112,17 +116,17 @@ class CRUDOrder(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
 
-        db.add(db_obj)
-        await db.commit()
-        await db.refresh(db_obj)
+        async_db.add(db_obj)
+        await async_db.commit()
+        await async_db.refresh(db_obj)
         return db_obj
 
     # delete oder by id
-    async def delete_order(self, db: AsyncSession, order_id: int) -> order_model.Order:
-        order = await self.get_order(db, order_id)
+    async def delete_order(self, async_db: AsyncSession, order_id: int) -> order_model.Order:
+        order = await self.get_order(async_db, order_id)
         if order:
-            await db.delete(order)
-            await db.commit()
+            await async_db.delete(order)
+            await async_db.commit()
         return order
 
 

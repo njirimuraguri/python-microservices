@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException,status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing_extensions import List
 
 from . import crud as customer_crud, schema as customer_schema
+from ..auth import model, dependencies
 from ..core.dependencies import get_session
 
 router = APIRouter()
@@ -12,9 +13,16 @@ router = APIRouter()
 @router.post("/customer", response_model=customer_schema.Customer)
 async def create_customer(
     customer: customer_schema.CustomerCreate,
-    async_db: AsyncSession = Depends(get_session)
+    async_db: AsyncSession = Depends(get_session),
+    current_user: model.User = Depends(dependencies.get_current_user)
 ):
     async with async_db as session:
+
+        if not current_user.email:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to create an order"
+            )
         created_customer = await customer_crud.customer.create_customer(async_db=session, obj_in=customer)
     return created_customer
 
@@ -78,7 +86,8 @@ async def delete_customer(
         customer_id: int,
         async_db: AsyncSession = Depends(get_session)
 ):
-    customer = await customer_crud.customer.get_customer(async_db=async_db, customer_id=customer_id)
+    async with async_db as session:
+        customer = await customer_crud.customer.get_customer(async_db=session, customer_id=customer_id)
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
 

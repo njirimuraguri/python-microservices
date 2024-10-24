@@ -7,6 +7,7 @@ class OrderBase(BaseModel):
     item: str
     amount: int
     time: datetime
+    phone_number: str
 
 
 # Properties to receive on order creation
@@ -16,7 +17,6 @@ class OrderCreate(OrderBase):
 
 # Properties to receive via API on order update
 class OrderUpdate(OrderBase):
-    def model_dump(self, exclude_unset):
         pass
 
 

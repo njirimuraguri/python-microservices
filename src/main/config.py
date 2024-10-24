@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="allow")
     APP_NAME: str = "FastAPI Main Service"
 
+    API_V1_STR: str = ""
+
     RABBITMQ_URL: str = os.getenv("RABBITMQ_URL")
 
 

@@ -10,6 +10,7 @@ from sqlalchemy import select
 from src.main.customer import model as customer_model
 from src.main.customer import schema as customer_schema
 from ..database.base import Base
+from src.main.auth.jwt_security import get_password_hash
 from .model import Customer
 
 ModelType = TypeVar("ModelType", bound=Base)
@@ -25,10 +26,9 @@ class CRUDCustomer(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     async def create_customer(
         self, async_db: AsyncSession, *, obj_in: Union[customer_schema.CustomerCreate, dict[str, Any]]
     ) -> customer_model.Customer:
-        if isinstance(obj_in, dict):
-            customer_data = obj_in
-        else:
-            customer_data = obj_in.model_dump(exclude_unset=True)
+        customer_data = obj_in.model_dump(exclude_unset=True)
+        if customer_data.get("hashed_password"):
+            customer_data["hashed_password"] = get_password_hash(customer_data["hashed_password"])
 
         db_customer = self.model(**customer_data)
         async_db.add(db_customer)
@@ -38,6 +38,7 @@ class CRUDCustomer(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     # function to get a customer
     async def get_customer(self, async_db: AsyncSession, customer_id: int) -> customer_model.Customer | None:
+
         result = await async_db.execute(select(self.model).where(self.model.id == customer_id))
         return result.scalars().first()
 
